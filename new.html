@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      border-radius: 1rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      background: linear-gradient(to bottom, #111827, #000000);
+    }
+
+    .capture-container {
+      position: absolute;
+      inset: 0;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      color: white;
+      opacity: 0;
+      transform: scale(0.95);
+      transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+      backdrop-filter: blur(8px);
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .icon-wrapper {
+      position: relative;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 9999px;
+      backdrop-filter: blur(4px);
+      transform: scale(0) rotate(-180deg);
+      transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .slide.active .icon-wrapper {
+      transform: scale(1) rotate(0);
+    }
+
+    .icon {
+      width: 80px;
+      height: 80px;
+      filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.3));
+    }
+    *{
+        font-family: 'Inter', sans-serif;
+    }
+    .title {
+      font-size: 3rem;
+      font-weight: bold;
+      margin: 2rem 0 1rem;
+      text-align: center;
+      letter-spacing: -0.025em;
+      transform: translateY(40px);
+      opacity: 0;
+      transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+      transition-delay: 0.3s;
+    }
+
+    .slide.active .title {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .description {
+      font-size: 1.25rem;
+      text-align: center;
+      max-width: 42rem;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+      transform: translateY(40px);
+      opacity: 0;
+      transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+      transition-delay: 0.4s;
+    }
+
+    .slide.active .description {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      transform: translateY(40px);
+      opacity: 0;
+      transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+      transition-delay: 0.5s;
+    }
+
+    .slide.active .features {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .feature {
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 9999px;
+      backdrop-filter: blur(4px);
+    }
+
+    .controls {
+      position: absolute;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .control-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      padding: 0.5rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: background-color 0.2s;
+    }
+
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .dots {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .dot {
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.4);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .dot.active {
+      background: white;
+      transform: scale(1.25);
+    }
+
+    .dot:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .gradient-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 10rem;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+      pointer-events: none;
+    }
+
+    .nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      padding: 1rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: background-color 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .prev-btn {
+      left: 2rem;
+    }
+
+    .next-btn {
+      right: 2rem;
+    }
+
+    .action-btns {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: background-color 0.2s;
+    }
+
+    .action-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    @media (min-width: 768px) {
+      .title {
+        font-size: 3.75rem;
+      }
+      
+      .description {
+        font-size: 1.5rem;
+      }
+      
+      .controls {
+        bottom: 2rem;
+      }
+      
+      .action-btns {
+        bottom: 2rem;
+        right: 2rem;
+        gap: 1rem;
+      }
+      
+      .nav-btn {
+        padding: 1.25rem;
+      }
+    }
+  </style>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+</head>
+<body>
+  <div class="container">
+    <div class="capture-container" id="slideshow">
+      <!-- Slides will be dynamically inserted here -->
+    </div>
+
+    <div class="gradient-overlay"></div>
+
+    <button class="nav-btn prev-btn" onclick="prevSlide()"><i class="fas fa-chevron-left"></i></button>
+    <button class="nav-btn next-btn" onclick="nextSlide()"><i class="fas fa-chevron-right"></i></button>
+
+    <div class="controls">
+      <button class="control-btn" onclick="togglePlayback()" id="playPauseBtn"><i class="fas fa-pause"></i></button>
+      <div class="dots" id="dots">
+        <!-- Dots will be dynamically inserted here -->
+      </div>
+    </div>
+
+    <div class="action-btns">
+      <button class="action-btn" onclick="downloadAsGif()" id="downloadBtn">
+        <i class="fas fa-download"></i> Download GIF
+      </button>
+      <button class="action-btn" onclick="shareContent()">
+        <i class="fas fa-share"></i> Share
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const sections = [
+      {
+        title: 'For Customers',
+        icon: '<i class="fas fa-user fa-3x"></i>',
+        color: 'linear-gradient(to bottom right, #60A5FA, #3B82F6, #2563EB)',
+        description: 'Book services instantly with real-time availability and secure payments',
+        features: ['Instant Booking', 'Secure Payments', 'Service History']
+      },
+      {
+        title: 'For Professionals',
+        icon: '<i class="fas fa-wrench fa-3x"></i>',
+        color: 'linear-gradient(to bottom right, #34D399, #10B981, #059669)',
+        description: 'Grow your business with smart scheduling and client management',
+        features: ['Smart Calendar', 'Client CRM', 'Payment Analytics']
+      },
+      {
+        title: 'For Admins',
+        icon: '<i class="fas fa-shield-alt fa-3x"></i>',
+        color: 'linear-gradient(to bottom right, #A78BFA, #8B5CF6, #7C3AED)',
+        description: 'Complete oversight with advanced verification and analytics',
+        features: ['User Verification', 'Performance Metrics', 'Support Tools']
+      }
+    ];
+
+    let currentSection = 0;
+    let isPlaying = true;
+    let slideInterval;
+
+    function createSlides() {
+      const container = document.getElementById('slideshow');
+      const dotsContainer = document.getElementById('dots');
+
+      sections.forEach((section, index) => {
+        // Create slide
+        const slide = document.createElement('div');
+        slide.className = `slide ${index === 0 ? 'active' : ''}`;
+        slide.style.background = section.color;
+        
+        slide.innerHTML = `
+          <div class="icon-wrapper">
+            <span class="icon">${section.icon}</span>
+          </div>
+          <h2 class="title">${section.title}</h2>
+          <p class="description">${section.description}</p>
+          <div class="features">
+            ${section.features.map(feature => 
+              `<div class="feature">${feature}</div>`
+            ).join('')}
+          </div>
+        `;
+        
+        container.appendChild(slide);
+
+        // Create dot
+        const dot = document.createElement('button');
+        dot.className = `dot ${index === 0 ? 'active' : ''}`;
+        dot.onclick = () => goToSlide(index);
+        dotsContainer.appendChild(dot);
+      });
+    }
+
+    function showSlide(index) {
+      const slides = document.querySelectorAll('.slide');
+      const dots = document.querySelectorAll('.dot');
+      
+      slides.forEach(slide => slide.classList.remove('active'));
+      dots.forEach(dot => dot.classList.remove('active'));
+      
+      slides[index].classList.add('active');
+      dots[index].classList.add('active');
+    }
+
+    function nextSlide() {
+      currentSection = (currentSection + 1) % sections.length;
+      showSlide(currentSection);
+    }
+
+    function prevSlide() {
+      currentSection = (currentSection - 1 + sections.length) % sections.length;
+      showSlide(currentSection);
+    }
+
+    function goToSlide(index) {
+      currentSection = index;
+      showSlide(currentSection);
+    }
+
+    function togglePlayback() {
+      isPlaying = !isPlaying;
+      const btn = document.getElementById('playPauseBtn');
+      btn.innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+      
+      if (isPlaying) {
+        startSlideshow();
+      } else {
+        stopSlideshow();
+      }
+    }
+
+    function startSlideshow() {
+      slideInterval = setInterval(nextSlide, 5000);
+    }
+
+    function stopSlideshow() {
+      clearInterval(slideInterval);
+    }
+
+    function gif_worker() {
+      // GIF.js worker code would go here
+      // This is just a placeholder since we don't have the actual worker code
+      self.onmessage = function(e) {
+        // Process frames and create GIF
+        // Send back the result
+      };
+    }
+
+    async function downloadAsGif() {
+      const downloadBtn = document.getElementById('downloadBtn');
+      downloadBtn.disabled = true;
+      downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating GIF...';
+
+      try {
+        const container = document.querySelector('.container');
+        const frames = [];
+        
+        // Capture each slide
+        for (let i = 0; i < sections.length; i++) {
+          goToSlide(i);
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          const canvas = await html2canvas(container, {
+            width: container.offsetWidth,
+            height: container.offsetHeight,
+            useCORS: true
+          });
+          frames.push(canvas.toDataURL());
+        }
+
+        // Create worker using the workaround
+        const worker = new Worker(URL.createObjectURL(
+          new Blob(["(" + gif_worker.toString() + ")()"], 
+          {type: 'text/javascript'})
+        ));
+
+        // Create GIF
+        const gif = new GIF({
+          workers: 2,
+          quality: 10,
+          width: container.offsetWidth,
+          height: container.offsetHeight,
+          workerScript: worker
+        });
+
+        frames.forEach(frame => {
+          const img = new Image();
+          img.src = frame;
+          gif.addFrame(img, { delay: 1000 });
+        });
+
+        gif.on('finished', function(blob) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'slideshow.gif';
+          a.click();
+
+          downloadBtn.disabled = false;
+          downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download GIF';
+        });
+
+        gif.render();
+      } catch (error) {
+        console.error('Error creating GIF:', error);
+        downloadBtn.disabled = false;
+        downloadBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error - Try Again';
+      }
+    }
+
+    function shareContent() {
+      if (navigator.share) {
+        navigator.share({
+          title: 'HomeServe Preview', 
+          text: 'Check out this amazing service platform!',
+          url: window.location.href
+        });
+      }
+    }
+
+    // Initialize
+    createSlides();
+    startSlideshow();
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+      if (e.key === ' ') {
+        e.preventDefault();
+        togglePlayback();
+      }
+    });
+  </script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+  <script>
+    // Disable CORS for gif.js worker
+    if (window.trustedTypes && window.trustedTypes.createPolicy) {
+      window.trustedTypes.createPolicy('default', {
+        createScriptURL: string => string
+      });
+    }
+  </script>
+</body>
+</html>
